@@ -46,7 +46,7 @@ nohup /home/yueling/miniconda3/envs/star_env/bin/STAR \
 --runThreadN 30 \
 --sjdbOverhang 149 > star_index.log 2>&1 &
 
-## --sjdbOverhang 199
+## --sjdbOverhang 99
 nohup /home/yueling/miniconda3/envs/star_env/bin/STAR \
 --runMode genomeGenerate \
 --genomeDir ~/star_index_99 \
