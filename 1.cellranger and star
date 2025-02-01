@@ -35,19 +35,33 @@ cellranger count \
 ###cellranger是不需要 解压fastq文件和按照bc_S1_L001_R2_001.fastq.gz这种方式来命名的
 ###############################################################################################################
 STAR 分析：
+
 # 第一步：构建索引
+##--sjdbOverhang 149
 nohup /home/yueling/miniconda3/envs/star_env/bin/STAR \
 --runMode genomeGenerate \
---genomeDir ~/star_index \
+--genomeDir ~/star_index_149 \
+--genomeFastaFiles ~/cellranger/ref/refdata-gex-GRCh38-2024-A/fasta/genome.fa \
+--sjdbGTFfile ~/cellranger/ref/refdata-gex-GRCh38-2024-A/genes/genes.gtf \
+--runThreadN 30 \
+--sjdbOverhang 149 > star_index.log 2>&1 &
+
+## --sjdbOverhang 199
+nohup /home/yueling/miniconda3/envs/star_env/bin/STAR \
+--runMode genomeGenerate \
+--genomeDir ~/star_index_99 \
 --genomeFastaFiles ~/cellranger/ref/refdata-gex-GRCh38-2024-A/fasta/genome.fa \
 --sjdbGTFfile ~/cellranger/ref/refdata-gex-GRCh38-2024-A/genes/genes.gtf \
 --runThreadN 30 \
 --sjdbOverhang 99 > star_index.log 2>&1 &
 
+zcat fastq.data.s15/bc_S1_L001_R1_001.fastq.gz | head
+# 这会显示出前几个读段的信息，其中每四行表示一个读段，第二行是实际的测序读段。通过这些信息，你可以确定读段的长度，并据此设置--sjdbOverhang参数。
+
 # 第二步：RNA velocity 分析
 nohup /home/yueling/miniconda3/envs/star_env/bin/STAR \
 --runThreadN 30 \
---genomeDir ~/star_index \
+--genomeDir ~/star_index \  #########根据自己的测序结果选择不同的index star_index_99或者 star_index_149
 --readFilesIn ~/cellranger/fastq/fastq.data.s15/bc_S1_L001_R2_001.fastq.gz ~/cellranger/fastq/fastq.data.s15/bc_S1_L001_R1_001.fastq.gz \  ###这里需要把R2放在R1之前
 --readFilesCommand zcat \
 --soloType Droplet \
