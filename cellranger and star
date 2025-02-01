@@ -1,0 +1,38 @@
+
+
+Cellranger 分析：
+# cellranger 环境设置
+export PATH=~/cellranger/cellranger-8.0.1/bin:$PATH
+source ~/cellranger/cellranger-8.0.1/sourceme.bash
+
+# 运行 cellranger count
+cellranger count \
+--id bc \
+--transcriptome ~/cellranger/ref/refdata-gex-GRCh38-2024-A \
+--fastqs ~/cellranger/fastq/fastq.data.s15 \
+--sample bc \
+--create-bam true \
+--nosecondary
+
+
+STAR 分析：
+# 第一步：构建索引
+nohup /home/yueling/miniconda3/envs/star_env/bin/STAR \
+--runMode genomeGenerate \
+--genomeDir ~/star_index \
+--genomeFastaFiles ~/cellranger/ref/refdata-gex-GRCh38-2024-A/fasta/genome.fa \
+--sjdbGTFfile ~/cellranger/ref/refdata-gex-GRCh38-2024-A/genes/genes.gtf \
+--runThreadN 30 \
+--sjdbOverhang 99 > star_index.log 2>&1 &
+
+# 第二步：RNA velocity 分析
+nohup /home/yueling/miniconda3/envs/star_env/bin/STAR \
+--runThreadN 30 \
+--genomeDir ~/star_index \
+--readFilesIn ~/cellranger/fastq/fastq.data.s15/bc_S1_L001_R2_001.fastq.gz ~/cellranger/fastq/fastq.data.s15/bc_S1_L001_R1_001.fastq.gz \
+--readFilesCommand zcat \
+--soloType Droplet \
+--soloFeatures Gene Velocyto \
+--soloCBwhitelist /home/yueling/cellranger/cellranger-8.0.1/lib/python/cellranger/barcodes/3M-february-2018.txt \
+--soloBarcodeReadLength 150 \
+--outFileNamePrefix star_velocyto_output/ > star_velocyto.log 2>&1 &
