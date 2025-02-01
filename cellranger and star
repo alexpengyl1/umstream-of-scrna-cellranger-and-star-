@@ -1,5 +1,24 @@
+fastqdump把srr文件转换为fastq文件
 
+# 创建环境
+conda create -n parallel-fastq-dump
+conda activate parallel-fastq-dump
 
+# 安装工具
+nohup conda install -c bioconda parallel-fastq-dump -y > parallel_fastq_install.log 2>&1 &
+#进入文件夹 
+cd /yueling/fastq
+# 基本格式
+parallel-fastq-dump -s SRR号 -t 30 -O 输出目录 --split-files --gzip
+
+# 例如
+parallel-fastq-dump \
+-s SRR11955371 \
+-t 30 \
+-O ./fastq_files/ \
+--split-files \
+--gzip
+################################################################################################################
 Cellranger 分析：
 # cellranger 环境设置
 export PATH=~/cellranger/cellranger-8.0.1/bin:$PATH
@@ -13,8 +32,8 @@ cellranger count \
 --sample bc \
 --create-bam true \
 --nosecondary
-
-
+###cellranger是不需要 解压fastq文件和按照bc_S1_L001_R2_001.fastq.gz这种方式来命名的
+###############################################################################################################
 STAR 分析：
 # 第一步：构建索引
 nohup /home/yueling/miniconda3/envs/star_env/bin/STAR \
@@ -29,7 +48,7 @@ nohup /home/yueling/miniconda3/envs/star_env/bin/STAR \
 nohup /home/yueling/miniconda3/envs/star_env/bin/STAR \
 --runThreadN 30 \
 --genomeDir ~/star_index \
---readFilesIn ~/cellranger/fastq/fastq.data.s15/bc_S1_L001_R2_001.fastq.gz ~/cellranger/fastq/fastq.data.s15/bc_S1_L001_R1_001.fastq.gz \
+--readFilesIn ~/cellranger/fastq/fastq.data.s15/bc_S1_L001_R2_001.fastq.gz ~/cellranger/fastq/fastq.data.s15/bc_S1_L001_R1_001.fastq.gz \  ###这里需要把R2放在R1之前
 --readFilesCommand zcat \
 --soloType Droplet \
 --soloFeatures Gene Velocyto \
